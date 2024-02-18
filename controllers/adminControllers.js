@@ -65,32 +65,26 @@ export const loginAdmin = async (req, res, next) => {
     }
 
     const admin = await Admin.findOne({ user_name }).select("+password");
-
     if (!admin) {
         return next(new ErrorHandler("Invalid user_name or password", 401));
     }
 
     const isPasswordMatched = await bcrypt.compare(password, admin.password)
-
     if (!isPasswordMatched) {
         return next(new ErrorHandler("Invalid user_name or password", 401));
     }
-
     if (admin.is_verified === false) {
         return next(new ErrorHandler("Email Is Not Verified Please Verify Email", 420));
     }
 
     const access_token = JwtService.sign({ _id: admin._id, role: admin.role });
     const refresh_token = JwtService.sign({ _id: admin._id, role: admin.role }, '1y', process.env.REFRESH_TOKEN);
-
     const refreshToken = await RefreshToken.create({ token: refresh_token });
     await refreshToken.save();
-
     res.cookie("JWToken", { access_token, refresh_token }, {
         expires: new Date(Date.now() + 3600000),
         httpOnly: true,
     })
-
     res.status(200).json({
         success: true,
         message: "Log in Successful..!",
