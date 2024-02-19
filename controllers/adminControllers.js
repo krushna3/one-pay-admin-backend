@@ -143,16 +143,16 @@ export const refresh = async (req, res, next) => {
     }
 }
 
-export const logout = async (req, res, next) => {
+export const signout = async (req, res, next) => {
     try {
         await RefreshToken.deleteOne({ token: req.body.refresh_token });
     } catch (error) {
-        return next(new Error('Something Went Worng In The Database'))
+        return next(new Error('Something Went Wrong In The Database', 500))
     }
 
     res.clearCookie("JWToken");
     res.status(200).json({
-        message: "Logout Successful..!"
+        message: "Signout Successful..!"
     });
 }
 
